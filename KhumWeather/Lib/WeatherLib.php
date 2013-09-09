@@ -1,7 +1,9 @@
 <?php
+App::uses('WeatherLib', 'KhumWeather.Lib');
 class WeatherLib {
 	var $settings = '';
 	var $requestUrl = '';
+	var $request = '';
 	var $data = false;
 	var $error = false;
 	
@@ -20,6 +22,7 @@ class WeatherLib {
 		'return' => 'html', // html, array, response
 		'cacheEngine' => 'File',
 		'cacheDuration' => false,
+		'bindDomain' => false,
 	);
 
 	var $formatType = array('json', 'xml');
@@ -56,7 +59,6 @@ class WeatherLib {
 		if(!$this->settings['cacheDuration'] ||
 		 (Cache::read('khumWeather.requestUrl') !== $this->requestUrl) ||
 		 (($detail = Cache::read('khumWeather.data')) === false)) {
-			debug('ok');
 			if(strtolower($this->settings['requestType']) == 'curl') {
 				$curlHandler = curl_init();
 				$defaults = array(
@@ -110,6 +112,11 @@ class WeatherLib {
 
 	function validate() {
 		$this->error = array();
+		if(!empty($this->settings['domainBind'])) {
+			if($this->request->domain(substr_count($this->settings['domainBind'], '.')) !== $this->settings['domainBind']) {
+				$this->error[] = 'Setup Error: Domain is bind within \''.$this->settings['domainBind'].'\'';
+			}
+		}
 		if(empty($this->settings['apiKey'])) $this->error[] = 'Setup Error: Require apiKey.';
 		if(!in_array($this->settings['return'], $this->returnType)) $this->error[] = 'Setup Error: Not valid return. Only accepts (\'html\', \'array\', \'response\').';
 		if(!in_array($this->settings['format'], $this->formatType)) $this->error[] = 'Setup Error: Not valid format. Only accepts (\'json\', \'xml\').';

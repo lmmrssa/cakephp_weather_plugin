@@ -23,6 +23,9 @@ class WeatherHelper extends AppHelper{
 		//setup settings
 		$this->settings = array_merge($this->weatherLib->defaults, $options);
 		$this->weatherLib->settings = $this->settings;
+		parent::__construct($View, $options);
+		$this->weatherLib->request = $this->request;
+		$this->weatherLib->validate();
 		if($this->settings['cacheDuration']) {
 			Cache::config('khumWeather', array(
 						'engine' => $this->settings['cacheEngine'],
@@ -34,7 +37,6 @@ class WeatherHelper extends AppHelper{
 					 	'lock' => false,
 			));
 		}
-		parent::__construct($View, $options);
 	}
 	
 	function _render($params = array()) {
